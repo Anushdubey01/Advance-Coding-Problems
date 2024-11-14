@@ -107,3 +107,83 @@ Hence, the answer is [10,21,-1,-1].
 ### Explanation:
 
 There is no possible way of forming a k-capable set for all k from 1 to n.
+
+
+
+# Pyton Solution
+
+```
+def getMinimumCost(cost, featureAvailability):
+    n = len(cost)
+    feature_a = []
+    feature_b = []
+    both_features = []
+    
+    for i in range(n):
+        if featureAvailability[i] == "11":
+            both_features.append(cost[i])
+        elif featureAvailability[i] == "10":
+            feature_b.append(cost[i])
+        elif featureAvailability[i] == "01":
+            feature_a.append(cost[i])
+    
+    feature_a.sort()
+    feature_b.sort()
+    both_features.sort()
+    
+    prefix_a = [0] * (len(feature_a) + 1)
+    prefix_b = [0] * (len(feature_b) + 1)
+    prefix_both = [0] * (len(both_features) + 1)
+    
+    for i in range(1, len(feature_a) + 1):
+        prefix_a[i] = prefix_a[i - 1] + feature_a[i - 1]
+    for i in range(1, len(feature_b) + 1):
+        prefix_b[i] = prefix_b[i - 1] + feature_b[i - 1]
+    for i in range(1, len(both_features) + 1):
+        prefix_both[i] = prefix_both[i - 1] + both_features[i - 1]
+    
+    def find_min_cost_for_k(k):
+        total_a = len(feature_a) + len(both_features)
+        total_b = len(feature_b) + len(both_features)
+        
+        if total_a < k or total_b < k:
+            return -1
+        
+        min_cost = float('inf')
+        
+        for both_count in range(min(k + 1, len(both_features) + 1)):
+            remaining_a = k - both_count
+            remaining_b = k - both_count
+            
+            if remaining_a > len(feature_a) or remaining_b > len(feature_b):
+                continue
+            
+            current_cost = prefix_both[both_count]
+            current_cost += prefix_a[remaining_a]
+            current_cost += prefix_b[remaining_b]
+            
+            min_cost = min(min_cost, current_cost)
+        
+        return min_cost if min_cost != float('inf') else -1
+    
+    result = []
+    for k in range(1, n + 1):
+        result.append(find_min_cost_for_k(k))
+    
+    return result
+
+if _name_ == '_main_':
+    n = int(input())
+    cost = []
+    for _ in range(n):
+        cost.append(int(input()))
+    
+    m = int(input())
+    featureAvailability = []
+    for _ in range(m):
+        featureAvailability.append(input())
+    
+    result = getMinimumCost(cost, featureAvailability)
+    for value in result:
+        print(value)
+```
